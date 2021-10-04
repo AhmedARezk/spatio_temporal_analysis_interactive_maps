@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[1]:
+# In[8]:
 
 
 def hotspots(variable, perms):
@@ -106,7 +106,7 @@ def hotspots(variable, perms):
     The following function conducts the analysis, and exports the plots as separate html files
     '''    
         
-    lok = locals()
+    glob = globals()
 
     colors = ["#2389b9", "#4fc8a7", "#e4f79d" , "#ffffc4" , "#fee09a" , "#fead6e" , "#ff644b" , "#d93e4e"]
     colors_m = ["#2389b9", "#fee09a" , "#ff644b" , "#d93e4e"]
@@ -125,10 +125,10 @@ def hotspots(variable, perms):
         df3_pc.iloc[:,i] = (df3_pc.iloc[:,i]/ (df3_pc.TOTPOP_CY))*100000
 
 
-    lok[variable+'_all_gi'] = df1[['NAME','geometry']].copy()
-    lok[variable+'_all_mi'] = df1[['NAME','geometry']].copy()
-    lok[variable+'_all_pc_gi'] = df1[['NAME','geometry']].copy()
-    lok[variable+'_all_pc_mi'] = df1[['NAME','geometry']].copy()
+    glob[variable+'_all_gi'] = df1[['NAME','geometry']].copy()
+    glob[variable+'_all_mi'] = df1[['NAME','geometry']].copy()
+    glob[variable+'_all_pc_gi'] = df1[['NAME','geometry']].copy()
+    glob[variable+'_all_pc_mi'] = df1[['NAME','geometry']].copy()
 
 
     # the hotspot analysis
@@ -144,13 +144,13 @@ def hotspots(variable, perms):
             #getting the values for gi
             Zs_gi = getisord.Zs
             Zs_gi[getisord.p_sim>0.05]= np.NaN
-            lok[variable+'_all_gi'][column]= Zs_gi
+            glob[variable+'_all_gi'][column]= Zs_gi
             #getting the values for moran i
-            lok[variable+'_all_mi']['clustering'] = moran_loc.q
-            lok[variable+'_all_mi']['p_sim'] = moran_loc.p_sim
-            lok[variable+'_all_mi'][column]= lok[variable+'_all_mi']['clustering'].map({1: 1, 2: 0.5, 3: 0.25, 4: 0.75})
-            lok[variable+'_all_mi'].loc[ (lok[variable+'_all_mi'].p_sim > 0.05) , column]= np.NaN
-            lok[variable+'_all_mi'].drop(columns = ['p_sim','clustering'], inplace = True)
+            glob[variable+'_all_mi']['clustering'] = moran_loc.q
+            glob[variable+'_all_mi']['p_sim'] = moran_loc.p_sim
+            glob[variable+'_all_mi'][column]= glob[variable+'_all_mi']['clustering'].map({1: 1, 2: 0.5, 3: 0.25, 4: 0.75})
+            glob[variable+'_all_mi'].loc[ (glob[variable+'_all_mi'].p_sim > 0.05) , column]= np.NaN
+            glob[variable+'_all_mi'].drop(columns = ['p_sim','clustering'], inplace = True)
 
     for n,year in zip([1437,1438,1439],[df1_pc,df2_pc,df3_pc]):
         for month in months:
@@ -163,24 +163,26 @@ def hotspots(variable, perms):
             #getting the values for gi
             Zs_gi = getisord.Zs
             Zs_gi[getisord.p_sim>0.05]= np.NaN
-            lok[variable+'_all_pc_gi'][column]= Zs_gi
+            glob[variable+'_all_pc_gi'][column]= Zs_gi
             #getting the values for moran i
-            lok[variable+'_all_pc_mi']['clustering'] = moran_loc.q
-            lok[variable+'_all_pc_mi']['p_sim'] = moran_loc.p_sim
-            lok[variable+'_all_pc_mi'][column]= lok[variable+'_all_pc_mi']['clustering'].map({1: 1, 2: 0.5, 3: 0.25, 4: 0.75})
-            lok[variable+'_all_pc_mi'].loc[ (lok[variable+'_all_pc_mi'].p_sim > 0.05) , column]= np.NaN
-            lok[variable+'_all_pc_mi'].drop(columns = ['p_sim','clustering'], inplace = True)
+            glob[variable+'_all_pc_mi']['clustering'] = moran_loc.q
+            glob[variable+'_all_pc_mi']['p_sim'] = moran_loc.p_sim
+            glob[variable+'_all_pc_mi'][column]= glob[variable+'_all_pc_mi']['clustering'].map({1: 1, 2: 0.5, 3: 0.25, 4: 0.75})
+            glob[variable+'_all_pc_mi'].loc[ (glob[variable+'_all_pc_mi'].p_sim > 0.05) , column]= np.NaN
+            glob[variable+'_all_pc_mi'].drop(columns = ['p_sim','clustering'], inplace = True)
 
 
 
 
     #prepare the heatmaps dataframe
-    for i in [lok[variable+'_all_gi'], lok[variable+'_all_mi'],lok[variable+'_all_pc_gi'], lok[variable+'_all_pc_mi']]:
-        i.drop(columns = ['geometry'], inplace = True)
-        i.set_index('NAME', inplace = True)
-        i = pd.DataFrame(i)
-        i = i.loc[['Madinah','Makkah','Jiddah','At-Taif', 'Al-Baha','Aseer', 'Jazan', 'Najran','Tabouk', 
-             'Al-Jouf', 'Al-Qurayyat', 'Northern Region','Hail','Qaseem','Ash Sharqiyah','Ar Riyad'],:]
+    for m in [glob[variable+'_all_gi'], glob[variable+'_all_mi'],
+              glob[variable+'_all_pc_gi'], glob[variable+'_all_pc_mi']]:
+        m.drop(columns = ['geometry'], inplace = True)
+        m.set_index('NAME', inplace = True)
+        m = pd.DataFrame(m)
+        m = m.reindex(['Madinah','Makkah','Jiddah','At-Taif', 'Al-Baha','Aseer', 'Jazan', 'Najran','Tabouk', 
+             'Al-Jouf', 'Al-Qurayyat', 'Northern Region','Hail','Qaseem','Ash Sharqiyah','Ar Riyad'])
+    
 
     # plotting the graphs
 
@@ -201,7 +203,7 @@ def hotspots(variable, perms):
 
 
 
-    dataframes = [lok[variable+'_all_gi'], lok[variable+'_all_pc_gi'], lok[variable+'_all_mi'], lok[variable+'_all_pc_mi']]
+    dataframes = [glob[variable+'_all_gi'], glob[variable+'_all_pc_gi'], glob[variable+'_all_mi'], glob[variable+'_all_pc_mi']]
     counter = 1
     
     for dataframe in dataframes:
@@ -298,7 +300,3 @@ def hotspots(variable, perms):
 
 
 # In[ ]:
-
-
-
-
